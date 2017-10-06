@@ -43,7 +43,7 @@ public class BoundsController {
             InviteEntity invite = new InviteEntity();
             invite.setFrom(from);
             invite.setTo(to);
-            invite.setStatus(false);
+//            invite.setStatus(false);
 
             inviteRepository.save(invite);
 
