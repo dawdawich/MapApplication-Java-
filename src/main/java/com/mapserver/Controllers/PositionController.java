@@ -35,7 +35,7 @@ public class PositionController {
                 if (user.getUser_position() != null) {
                     user.getUser_position().setLongitude(jsonObject.getLong("longitude"));
                     user.getUser_position().setLatitude(jsonObject.getLong("latitude"));
-                    userPositionRepository.save(user.getUser_position());
+//                    userPositionRepository.save(user.getUser_position());
                     userRepository.save(user);
                 }
                 else
@@ -43,8 +43,8 @@ public class PositionController {
                     UserPositionEntity userPosition = new UserPositionEntity();
                     userPosition.setLongitude(jsonObject.getLong("longitude"));
                     userPosition.setLatitude(jsonObject.getLong("latitude"));
+                    userPosition.setUserEntity(user);
                     user.setUser_position(userPosition);
-                    userPositionRepository.save(user.getUser_position());
                     userRepository.save(user);
                 }
             }
@@ -52,7 +52,8 @@ public class PositionController {
 
             JSONObject response = new JSONObject();
             try {
-                response.put("successful", true);
+                response.put("error", false);
+                response.put("error_msg", "");
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }
@@ -63,7 +64,53 @@ public class PositionController {
             e.printStackTrace();
             JSONObject response = new JSONObject();
             try {
-                response.put("successful", false);
+                response.put("error", true);
+                response.put("error_msg", "problems with json");
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+            return response.toString();
+        }
+    }
+
+    @RequestMapping(path = "/get_position")
+    @ResponseBody
+    public String getPosition(HttpEntity<String> json)
+    {
+        try {
+            JSONObject jsonObject = new JSONObject(json.getBody());
+
+            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
+            if (user != null && user.getUser_position() != null)
+            {
+                    JSONObject userPos = new JSONObject();
+                    JSONObject msg = new JSONObject();
+                    userPos.put("nickname", user.getNickname());
+                    userPos.put("longitude", user.getUser_position().getLongitude());
+                    userPos.put("latitude", user.getUser_position().getLatitude());
+                    msg.put("error", false);
+                    msg.put("user", userPos);
+                    return msg.toString();
+            }
+            else
+            {
+                JSONObject response = new JSONObject();
+                try {
+                    response.put("error", true);
+                    response.put("error_msg", "Have no user position!");
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+                return response.toString();
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            JSONObject response = new JSONObject();
+            try {
+                response.put("error", true);
+                response.put("error_msg", "problems with json!");
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }

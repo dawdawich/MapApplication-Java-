@@ -1,11 +1,15 @@
 package com.mapserver.Entities;
 
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 
 @Entity
 @Table(name = "users")
@@ -13,6 +17,7 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "user_id")
     private Integer id;
 
     @Column(name = "nickname")
@@ -29,9 +34,21 @@ public class UserEntity {
     private Date date_of_creation;
 
 
-    @JoinColumn(name = "user_position")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     private UserPositionEntity user_position;
+
+    @ManyToMany(cascade={CascadeType.ALL})
+    @JoinTable(name="friends_relations",
+            joinColumns={@JoinColumn(name="user_one")},
+            inverseJoinColumns={@JoinColumn(name="user_two")})
+    private Set<UserEntity> friends = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "to")
+    private Set<InviteEntity> incomingInvites = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "from")
+    private Set<InviteEntity> outcomingInvite = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -79,5 +96,29 @@ public class UserEntity {
 
     public void setUser_position(UserPositionEntity user_position) {
         this.user_position = user_position;
+    }
+
+    public Set<UserEntity> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(Set<UserEntity> friends) {
+        this.friends = friends;
+    }
+
+    public Set<InviteEntity> getIncomingInvites() {
+        return incomingInvites;
+    }
+
+    public void setIncomingInvites(Set<InviteEntity> incomingInvites) {
+        this.incomingInvites = incomingInvites;
+    }
+
+    public Set<InviteEntity> getOutcomingInvite() {
+        return outcomingInvite;
+    }
+
+    public void setOutcomingInvite(Set<InviteEntity> outcomingInvite) {
+        this.outcomingInvite = outcomingInvite;
     }
 }

@@ -19,6 +19,8 @@ public class LoginController {
     @Autowired
     private UserRepository userRepository;
 
+
+    //TODO: complete checking for identically nicknames
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public String register(HttpEntity<String> json)
