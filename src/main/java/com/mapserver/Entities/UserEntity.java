@@ -50,6 +50,9 @@ public class UserEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "from")
     private Set<InviteEntity> outcomingInvite = new HashSet<>();
 
+    @Column(name = "get_update", columnDefinition = "BOOLEAN DEFAULT 0")
+    private Boolean getUpdate;
+
     public Integer getId() {
         return id;
     }
@@ -120,5 +123,13 @@ public class UserEntity {
 
     public void setOutcomingInvite(Set<InviteEntity> outcomingInvite) {
         this.outcomingInvite = outcomingInvite;
+    }
+
+    public Boolean getGetUpdate() {
+        return getUpdate;
+    }
+
+    public void setGetUpdate(Boolean getUpdate) {
+        this.getUpdate = getUpdate;
     }
 }

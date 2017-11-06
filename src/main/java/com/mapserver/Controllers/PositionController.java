@@ -29,7 +29,7 @@ public class PositionController {
         try {
             JSONObject jsonObject = new JSONObject(json.getBody());
 
-            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
+            UserEntity user = userRepository.findById(jsonObject.getInt("usr_id"));
             if (user != null)
             {
                 if (user.getUser_position() != null) {
@@ -80,7 +80,7 @@ public class PositionController {
         try {
             JSONObject jsonObject = new JSONObject(json.getBody());
 
-            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
+            UserEntity user = userRepository.findById(jsonObject.getInt("user_id"));
             if (user != null && user.getUser_position() != null)
             {
                     JSONObject userPos = new JSONObject();
