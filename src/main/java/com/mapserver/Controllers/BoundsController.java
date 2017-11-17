@@ -2,6 +2,8 @@ package com.mapserver.Controllers;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapserver.Adapter.UserEntityAdapter;
 import com.mapserver.Entities.InviteEntity;
 import com.mapserver.Entities.UserEntity;
 import com.mapserver.Repositories.InviteRepository;
@@ -34,9 +36,7 @@ public class BoundsController {
         try {
             JSONObject jsonObject = new JSONObject(data.getBody());
 
-//            UserEntity from = userRepository.findByNickname(jsonObject.getString("user_from"));
             UserEntity from = userRepository.findById(jsonObject.getInt("user_from_id"));
-//            UserEntity to = userRepository.findByNickname(jsonObject.getString("user_to"));
             UserEntity to = userRepository.findById(jsonObject.getInt("user_to_id"));
 
             if (from == null || to == null)
@@ -85,7 +85,6 @@ public class BoundsController {
 
         try {
             JSONObject jsonObject = new JSONObject(data.getBody());
-//            InviteEntity inviteEntity = inviteRepository.findByFromNicknameAndToNickname(jsonObject.getString("user_from"), jsonObject.getString("user_to"));
             InviteEntity inviteEntity = inviteRepository.findByFromIdAndToId(jsonObject.getInt("user_from_id"), jsonObject.getInt("user_to_id"));
             inviteEntity.getFrom().getFriends().add(inviteEntity.getTo());
             inviteEntity.getFrom().setGetUpdate(true);
@@ -117,22 +116,15 @@ public class BoundsController {
     {
         try {
             JSONObject jsonObject = new JSONObject(data.getBody());
-//            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
             UserEntity user = userRepository.findById(jsonObject.getInt("id"));
 
-            List<Map<String, Object>> friends = new ArrayList<>();
-
-            for (UserEntity friend : user.getFriends())
-            {
-                Map<String, Object> friend_data = new HashMap<>();
-                friend_data.put("id", friend.getId());
-                friend_data.put("nickname", friend.getNickname());
-                friends.add(friend_data);
-            }
+            GsonBuilder formatterAdapter = new GsonBuilder();
+            formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
+            Gson formatter = formatterAdapter.create();
 
             JSONObject msg= new JSONObject();
             msg.put("error", false);
-            msg.put("friends", friends);
+            msg.put("friends", formatter.toJson(user.getFriends()));
 
             return msg.toString();
         } catch (JSONException e) {
@@ -155,17 +147,80 @@ public class BoundsController {
     {
         try {
             JSONObject jsonObject = new JSONObject(data.getBody());
-//            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
             String nickname = jsonObject.getString("nickname");
 
             Set<UserEntity> users = userRepository.findByNicknameContains(nickname);
 
+            for (UserEntity user : users)
+            {
+                user.setFriends(null);
+                user.setOutcomingInvite(null);
+                user.setIncomingInvites(null);
+            }
 
+            GsonBuilder formatterAdapter = new GsonBuilder();
+            formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
+            Gson formatter = formatterAdapter.create();
 
             JSONObject msg= new JSONObject();
-            JSONArray usersArray = new JSONArray(new Gson().toJson(users));
+            JSONArray usersArray = new JSONArray(formatter.toJson(users));
             msg.put("error", false);
             msg.put("friends", usersArray);
+
+            return msg.toString();
+        } catch (JSONException e) {
+
+            JSONObject msg = new JSONObject();
+            try {
+                msg.put("error", true);
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+
+            e.printStackTrace();
+            return msg.toString();
+        }
+    }
+
+    @RequestMapping(path = "/send_invite", consumes = {"application/json"}, method = RequestMethod.POST)
+    @ResponseBody
+    public String sendInvite(HttpEntity<String> data)
+    {
+        try {
+            JSONObject jsonObject = new JSONObject(data.getBody());
+//            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
+
+            if (inviteRepository.findByFromIdAndToId(jsonObject.getInt("this_user_id"), jsonObject.getInt("current_user_id")) != null)
+            {
+                UserEntity to = userRepository.findById(jsonObject.getInt("current_user_id"));
+                to.setFriends(null);
+                to.setIncomingInvites(null);
+                to.setOutcomingInvite(null);
+                JSONObject msg= new JSONObject();
+                JSONObject friend = new JSONObject(new Gson().toJson(to));
+                msg.put("error", false);
+                msg.put("friend", friend);
+
+            }
+
+
+            UserEntity from = userRepository.findById(jsonObject.getInt("this_user_id"));
+            UserEntity to = userRepository.findById(jsonObject.getInt("current_user_id"));
+
+            InviteEntity bound = new InviteEntity();
+            bound.setTo(to);
+            bound.setFrom(from);
+            inviteRepository.save(bound);
+
+
+            GsonBuilder formatterAdapter = new GsonBuilder();
+            formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
+            Gson formatter = formatterAdapter.create();
+
+            JSONObject msg= new JSONObject();
+            JSONObject friend = new JSONObject(formatter.toJson(to));
+            msg.put("error", false);
+            msg.put("friend", friend);
 
             return msg.toString();
         } catch (JSONException e) {

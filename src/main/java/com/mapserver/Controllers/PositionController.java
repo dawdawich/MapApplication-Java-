@@ -80,12 +80,12 @@ public class PositionController {
         try {
             JSONObject jsonObject = new JSONObject(json.getBody());
 
-            UserEntity user = userRepository.findById(jsonObject.getInt("user_id"));
+            UserEntity user = userRepository.findById(jsonObject.getInt("id"));
             if (user != null && user.getUser_position() != null)
             {
                     JSONObject userPos = new JSONObject();
                     JSONObject msg = new JSONObject();
-                    userPos.put("nickname", user.getNickname());
+                    userPos.put("id", user.getId());
                     userPos.put("longitude", user.getUser_position().getLongitude());
                     userPos.put("latitude", user.getUser_position().getLatitude());
                     msg.put("error", false);

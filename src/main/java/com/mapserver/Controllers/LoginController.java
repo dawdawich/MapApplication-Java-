@@ -1,5 +1,8 @@
 package com.mapserver.Controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapserver.Adapter.UserEntityAdapter;
 import com.mapserver.Entities.UserEntity;
 import com.mapserver.Repositories.UserRepository;
 import org.json.JSONException;
@@ -82,13 +85,12 @@ public class LoginController {
 
             if (user != null && user.getPassword().equals(jsonObject.getString("password")))
             {
-                JSONObject userJson = new JSONObject();
+                GsonBuilder formatterAdapter = new GsonBuilder();
+                formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
+                Gson formatter = formatterAdapter.create();
                 JSONObject msg = new JSONObject();
-                userJson.put("nickname", user.getNickname());
-                userJson.put("password", user.getPassword());
-                userJson.put("email", user.getEmail());
                 msg.put("error", false);
-                msg.put("user", userJson);
+                msg.put("user", new JSONObject(formatter.toJson(user)));
 
                 return msg.toString();
             }
