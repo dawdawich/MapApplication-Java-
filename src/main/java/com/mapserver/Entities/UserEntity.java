@@ -38,11 +38,14 @@ public class UserEntity {
     @PrimaryKeyJoinColumn
     private UserPositionEntity user_position;
 
-    @ManyToMany(cascade={CascadeType.ALL})
+    @ManyToMany(cascade={CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinTable(name="friends_relations",
-            joinColumns={@JoinColumn(name="user_one")},
-            inverseJoinColumns={@JoinColumn(name="user_two")})
-    private Set<UserEntity> friends = new HashSet<>();
+            joinColumns={@JoinColumn(name="user_one", referencedColumnName = "user_id")},
+            inverseJoinColumns={@JoinColumn(name="user_two", referencedColumnName = "user_id")})
+    private Set<UserEntity> friendsPartOne = new HashSet<>();
+
+    @ManyToMany(mappedBy = "friendsPartOne")
+    private Set<UserEntity> friendsPartTwo = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "to")
     private Set<InviteEntity> incomingInvites = new HashSet<>();
@@ -51,7 +54,10 @@ public class UserEntity {
     private Set<InviteEntity> outcomingInvite = new HashSet<>();
 
     @Column(name = "get_update", columnDefinition = "BOOLEAN DEFAULT 0")
-    private Boolean getUpdate;
+    private Boolean isUpdate;
+
+    @Transient
+    private Set<UserEntity> friends = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -101,14 +107,6 @@ public class UserEntity {
         this.user_position = user_position;
     }
 
-    public Set<UserEntity> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(Set<UserEntity> friends) {
-        this.friends = friends;
-    }
-
     public Set<InviteEntity> getIncomingInvites() {
         return incomingInvites;
     }
@@ -125,11 +123,42 @@ public class UserEntity {
         this.outcomingInvite = outcomingInvite;
     }
 
-    public Boolean getGetUpdate() {
-        return getUpdate;
+    public Boolean getUpdate() {
+        return isUpdate;
     }
 
-    public void setGetUpdate(Boolean getUpdate) {
-        this.getUpdate = getUpdate;
+    public void setUpdate(Boolean getUpdate) {
+        this.isUpdate = getUpdate;
+    }
+
+    public Set<UserEntity> getFriendsPartOne() {
+        return friendsPartOne;
+    }
+
+    public void setFriendsPartOne(Set<UserEntity> friendsPartOne) {
+        this.friendsPartOne = friendsPartOne;
+    }
+
+    public Set<UserEntity> getFriendsPartTwo() {
+        return friendsPartTwo;
+    }
+
+    public void setFriendsPartTwo(Set<UserEntity> friendsPartTwo) {
+        this.friendsPartTwo = friendsPartTwo;
+    }
+
+    public Set<UserEntity> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(Set<UserEntity> friends) {
+        this.friends = friends;
+    }
+
+    public void combineFriends()
+    {
+        friends.clear();
+        friends.addAll(friendsPartOne);
+        friends.addAll(friendsPartTwo);
     }
 }

@@ -70,9 +70,15 @@ public class LoginController {
 
         } catch (JSONException e) {
             e.printStackTrace();
+            JSONObject msg = new JSONObject();
+            try {
+                msg.put("error", true);
+                msg.put("error_msg", "Wrong json");
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+            return msg.toString();
         }
-
-        return "true";
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

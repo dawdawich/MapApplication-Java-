@@ -16,10 +16,10 @@ public class UserPositionEntity {
     private Integer id;
 
     @Column(name = "longitude")
-    private Long longitude;
+    private Double longitude;
 
     @Column(name = "latitude")
-    private Long latitude;
+    private Double latitude;
 
     @Column(name = "last_update",columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -38,19 +38,19 @@ public class UserPositionEntity {
         this.id = id;
     }
 
-    public Long getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Long longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public Long getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Long latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 

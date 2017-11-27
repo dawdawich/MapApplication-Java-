@@ -31,7 +31,7 @@ public class UserController {
             JSONObject msg = new JSONObject();
 
             msg.put("error", false);
-            msg.put("has_update", userRepository.findById(jsonObject.getInt("id")).getGetUpdate());
+            msg.put("has_update", userRepository.findById(jsonObject.getInt("id")).getUpdate());
 
             return msg.toString();
 
@@ -63,9 +63,22 @@ public class UserController {
             formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
             Gson formatter = formatterAdapter.create();
 
+
+            UserEntity user = userRepository.findById(jsonObject.getInt("id"));
+            if (user == null)
+            {
+                JSONObject msg = new JSONObject();
+                msg.put("error", true);
+                msg.put("error_msg", "User is null");
+
+                return msg.toString();
+            }
+            user.combineFriends();
             JSONObject msg = new JSONObject();
             msg.put("error", false);
-            msg.put("user", new JSONObject(formatter.toJson(userRepository.findById(jsonObject.getInt("id")))));
+            msg.put("user", new JSONObject(formatter.toJson(user)));
+            user.setUpdate(false);
+            userRepository.save(user);
 
             return msg.toString();
 

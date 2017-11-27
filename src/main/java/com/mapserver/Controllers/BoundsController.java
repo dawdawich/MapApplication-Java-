@@ -54,8 +54,8 @@ public class BoundsController {
 
             inviteRepository.save(invite);
 
-            from.setGetUpdate(true);
-            to.setGetUpdate(true);
+            from.setUpdate(true);
+            to.setUpdate(true);
 
             userRepository.save(from);
             userRepository.save(to);
@@ -86,9 +86,9 @@ public class BoundsController {
         try {
             JSONObject jsonObject = new JSONObject(data.getBody());
             InviteEntity inviteEntity = inviteRepository.findByFromIdAndToId(jsonObject.getInt("user_from_id"), jsonObject.getInt("user_to_id"));
-            inviteEntity.getFrom().getFriends().add(inviteEntity.getTo());
-            inviteEntity.getFrom().setGetUpdate(true);
-            inviteEntity.getTo().setGetUpdate(true);
+            inviteEntity.getFrom().getFriendsPartOne().add(inviteEntity.getTo());
+            inviteEntity.getFrom().setUpdate(true);
+            inviteEntity.getTo().setUpdate(true);
             userRepository.save(inviteEntity.getFrom());
             userRepository.save(inviteEntity.getTo());
             inviteRepository.delete(inviteEntity);
@@ -102,7 +102,7 @@ public class BoundsController {
             JSONObject msg = new JSONObject();
             try {
                 msg.put("error", true);
-                return msg.toString();
+                msg.put("error_msg", "BoundsController -> confirmInvitation()");
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }
@@ -132,6 +132,7 @@ public class BoundsController {
             JSONObject msg = new JSONObject();
             try {
                 msg.put("error", true);
+                msg.put("error_msg", "BoundsController -> getFriends()");
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }
@@ -190,17 +191,19 @@ public class BoundsController {
             JSONObject jsonObject = new JSONObject(data.getBody());
 //            UserEntity user = userRepository.findByNickname(jsonObject.getString("nickname"));
 
-            if (inviteRepository.findByFromIdAndToId(jsonObject.getInt("this_user_id"), jsonObject.getInt("current_user_id")) != null)
+            if (inviteRepository.findByFromIdAndToId(jsonObject.getInt("this_user_id"), jsonObject.getInt("current_user_id")) != null ||
+                    inviteRepository.findByFromIdAndToId(jsonObject.getInt("current_user_id"), jsonObject.getInt("this_user_id")) != null)
             {
                 UserEntity to = userRepository.findById(jsonObject.getInt("current_user_id"));
-                to.setFriends(null);
-                to.setIncomingInvites(null);
-                to.setOutcomingInvite(null);
+                GsonBuilder formatterAdapter = new GsonBuilder();
+                formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
+                Gson formatter = formatterAdapter.create();
+
                 JSONObject msg= new JSONObject();
-                JSONObject friend = new JSONObject(new Gson().toJson(to));
+                JSONObject friend = new JSONObject(formatter.toJson(to));
                 msg.put("error", false);
                 msg.put("friend", friend);
-
+                return msg.toString();
             }
 
 
@@ -208,10 +211,13 @@ public class BoundsController {
             UserEntity to = userRepository.findById(jsonObject.getInt("current_user_id"));
 
             InviteEntity bound = new InviteEntity();
+            from.setUpdate(true);
+            to.setUpdate(true);
             bound.setTo(to);
             bound.setFrom(from);
             inviteRepository.save(bound);
-
+            userRepository.save(to);
+            userRepository.save(from);
 
             GsonBuilder formatterAdapter = new GsonBuilder();
             formatterAdapter.registerTypeAdapter(UserEntity.class, new UserEntityAdapter());
@@ -228,6 +234,7 @@ public class BoundsController {
             JSONObject msg = new JSONObject();
             try {
                 msg.put("error", true);
+                msg.put("error_msg", "BoundsController -> sendInvitation()");
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }

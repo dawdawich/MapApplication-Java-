@@ -29,20 +29,20 @@ public class PositionController {
         try {
             JSONObject jsonObject = new JSONObject(json.getBody());
 
-            UserEntity user = userRepository.findById(jsonObject.getInt("usr_id"));
+            UserEntity user = userRepository.findById(jsonObject.getInt("id"));
             if (user != null)
             {
                 if (user.getUser_position() != null) {
-                    user.getUser_position().setLongitude(jsonObject.getLong("longitude"));
-                    user.getUser_position().setLatitude(jsonObject.getLong("latitude"));
+                    user.getUser_position().setLongitude(jsonObject.getDouble("longitude"));
+                    user.getUser_position().setLatitude(jsonObject.getDouble("latitude"));
 //                    userPositionRepository.save(user.getUser_position());
                     userRepository.save(user);
                 }
                 else
                 {
                     UserPositionEntity userPosition = new UserPositionEntity();
-                    userPosition.setLongitude(jsonObject.getLong("longitude"));
-                    userPosition.setLatitude(jsonObject.getLong("latitude"));
+                    userPosition.setLongitude(jsonObject.getDouble("longitude"));
+                    userPosition.setLatitude(jsonObject.getDouble("latitude"));
                     userPosition.setUserEntity(user);
                     user.setUser_position(userPosition);
                     userRepository.save(user);
@@ -88,6 +88,7 @@ public class PositionController {
                     userPos.put("id", user.getId());
                     userPos.put("longitude", user.getUser_position().getLongitude());
                     userPos.put("latitude", user.getUser_position().getLatitude());
+                    userPos.put("last_update", user.getUser_position().getLast_update().toString());
                     msg.put("error", false);
                     msg.put("user", userPos);
                     return msg.toString();
