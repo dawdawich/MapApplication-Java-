@@ -1,13 +1,10 @@
 package com.mapserver.Entities;
 
 
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -55,6 +52,12 @@ public class UserEntity {
 
     @Column(name = "get_update", columnDefinition = "BOOLEAN DEFAULT 0")
     private Boolean isUpdate;
+
+    @Column(name = "avatar_path")
+    private String avatar_path;
+
+    @Column(name = "avatar_name")
+    private String avatar_name;
 
     @Transient
     private Set<UserEntity> friends = new HashSet<>();
@@ -153,6 +156,22 @@ public class UserEntity {
 
     public void setFriends(Set<UserEntity> friends) {
         this.friends = friends;
+    }
+
+    public String getAvatar_path() {
+        return avatar_path;
+    }
+
+    public void setAvatar_path(String avatar_path) {
+        this.avatar_path = avatar_path;
+    }
+
+    public String getAvatar_name() {
+        return avatar_name;
+    }
+
+    public void setAvatar_name(String avatar_name) {
+        this.avatar_name = avatar_name;
     }
 
     public void combineFriends()
